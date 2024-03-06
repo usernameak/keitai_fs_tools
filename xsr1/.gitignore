@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/rfs_dumper
+rfs_dumper.so
+rfs_dumper.dylib
+rfs_dumper.dll
+rfs_dumper.a
+rfs_dumper.lib
+rfs_dumper-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst
