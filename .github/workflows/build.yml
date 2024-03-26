@@ -1,0 +1,53 @@
+name: build
+on: [push, pull_request]
+
+jobs:
+  xsr1:
+    name: xsr1 build - ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install D compiler
+        uses: dlang-community/setup-dlang@v1
+        with:
+          compiler: dmd-latest
+
+      - name: Run build
+        working-directory: ./xsr1
+        run: dub build --build=release
+
+      - name: Upload ${{ matrix.os }} binary
+        uses: actions/upload-artifact@v4
+        with: 
+          name: xsr1 - ${{ matrix.os }} binary
+          path: ./xsr1/rfs_dumper*
+
+  toshiba:
+    name: toshiba build - ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure and Build Project
+        uses: threeal/cmake-action@main
+        with: 
+          source-dir: ./toshiba
+          build-dir: ./toshiba/build
+          args: -DCMAKE_BUILD_TYPE=Release -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
+          generator: Visual Studio 17 2022
+
+      - name: Upload ${{ matrix.os }} binary
+        uses: actions/upload-artifact@v4
+        with: 
+          name: toshiba - ${{ matrix.os }} binary
+          path: ./toshiba/build/Debug/toshiba_remap.exe
