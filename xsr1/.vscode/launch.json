@@ -1,0 +1,19 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "code-d",
+            "request": "launch",
+            "name": "Debug D project",
+            "cwd": "${workspaceFolder}",
+            "program": "./xsr1app/rfs_dumper_xsr1app.exe",
+            "args": [
+                "D:\\reveng\\imode\\!phone_dumps\\p903i\\onenand.bin",
+                "D:\\reveng\\imode\\!phone_dumps\\p903i\\onenand_test.bin"
+            ]
+        }
+    ]
+}

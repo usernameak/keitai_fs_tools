@@ -60,8 +60,34 @@ struct MapInfo {
 
 static assert(MapBlock.sizeof == 512);
 
-void findNewestMaster(ref File f, out uint masterBlock, out uint masterPage) {
+class MasterBlockNotFoundException : Exception {
+    this(string msg, string file = __FILE__, size_t line = __LINE__) {
+        super(msg, file, line);
+    }
+}
+
+uint findMasterBlockOrigin(ref File f) {
     f.seek(0);
+
+    uint[BYTES_PER_PAGE / 4] buffer;
+
+    uint currentBlock = 0;
+    while (true) {
+        for (uint page = 0; page < PAGES_PER_BLOCK; page++) {
+            if (f.rawRead(buffer).length != buffer.length) {
+                throw new MasterBlockNotFoundException("master block not found");
+            }
+
+            if (buffer[0] == 0x2C495A91) {
+                return currentBlock;
+            }
+        }
+        currentBlock++;
+    }
+}
+
+void findNewestMaster(ref File f, uint origin, out uint masterBlock, out uint masterPage) {
+    f.seek(origin * PAGES_PER_BLOCK * BYTES_PER_PAGE);
 
     uint[BYTES_PER_PAGE / 4] buffer;
 
@@ -86,12 +112,12 @@ void findNewestMaster(ref File f, out uint masterBlock, out uint masterPage) {
     masterPage = maxPage;
 }
 
-void scanMaps(ref File f, ref MasterBlock master, ref MapInfo[] maps, uint mapIndex) {
+void scanMaps(ref File f, uint origin, ref MasterBlock master, ref MapInfo[] maps, uint mapIndex) {
 	if (master.map_blocks[mapIndex] == 0) return;
 	
 	writefln!"map %#x at block %#x, offs %#x"(mapIndex, master.map_blocks[mapIndex], master.map_blocks[mapIndex] * PAGES_PER_BLOCK * BYTES_PER_PAGE);
 	
-    f.seek(master.map_blocks[mapIndex] * PAGES_PER_BLOCK * BYTES_PER_PAGE);
+    f.seek((origin + master.map_blocks[mapIndex]) * PAGES_PER_BLOCK * BYTES_PER_PAGE);
 
     uint[BYTES_PER_PAGE / 4] buffer;
 
@@ -115,10 +141,12 @@ void scanMaps(ref File f, ref MasterBlock master, ref MapInfo[] maps, uint mapIn
 }
 
 void parseImage(File inputFile, File outputFile) {
-    uint masterBlock, masterPage;
-    findNewestMaster(inputFile, masterBlock, masterPage);
+    uint masterBlockOrigin = findMasterBlockOrigin(inputFile);
 
-    inputFile.seek((masterBlock * PAGES_PER_BLOCK + masterPage) * BYTES_PER_PAGE);
+    uint masterBlock, masterPage;
+    findNewestMaster(inputFile, masterBlockOrigin, masterBlock, masterPage);
+
+    inputFile.seek(((masterBlock + masterBlockOrigin) * PAGES_PER_BLOCK + masterPage) * BYTES_PER_PAGE);
 
     MasterBlock master;
     inputFile.rawRead((&master)[0..1]);
@@ -129,7 +157,7 @@ void parseImage(File inputFile, File outputFile) {
     MapInfo[] maps = new MapInfo[master.max_map_index];
 
     foreach (uint i; 0..master.num_block_maps) {
-        scanMaps(inputFile, master, maps, i);
+        scanMaps(inputFile, masterBlockOrigin, master, maps, i);
     }
 
     ubyte[2048] buffer;
@@ -139,7 +167,7 @@ void parseImage(File inputFile, File outputFile) {
             uint block = mapInfo.map.block_map[i];
             foreach (uint j; 0..64) {
                 uint page = mapInfo.map.page_map[i][j] * 4;
-                inputFile.seek((block * PAGES_PER_BLOCK + page) * BYTES_PER_PAGE);
+                inputFile.seek(((block + masterBlockOrigin) * PAGES_PER_BLOCK + page) * BYTES_PER_PAGE);
                 inputFile.rawRead(buffer);
                 outputFile.rawWrite(buffer);
             }

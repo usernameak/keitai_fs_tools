@@ -1,4 +1,7 @@
 {
 	"name": "xsr1core",
-    "targetType": "dynamicLibrary"
+    "targetType": "dynamicLibrary",
+    "dflags-ldc": [
+        "--link-defaultlib-shared"
+    ]
 }

@@ -3,5 +3,8 @@
     "targetType": "executable",
 	"dependencies": {
 		"rfs_dumper:xsr1core": "*"
-	}
+	},
+    "dflags-ldc": [
+        "--link-defaultlib-shared"
+    ]
 }
