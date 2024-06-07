@@ -2,8 +2,17 @@
 	"authors": [
 		"usernameak"
 	],
+	"targetType": "none",
+	"subPackages": [
+		"xsr1app",
+		"xsr1core"
+	],
 	"copyright": "Copyright (c) 2023 usernameak",
 	"description": "A tool to dump the legacy Samsung RFS filesystem, like the one used in early i-mode Panasonic phones (kernel module rfs.o).",
 	"license": "BSD-3-Clause",
-	"name": "rfs_dumper"
+	"name": "rfs_dumper",
+	"dependencies": {
+		":xsr1app": "*",
+		":xsr1core": "*"
+	}
 }

@@ -1,0 +1,4 @@
+{
+	"name": "xsr1core",
+    "targetType": "dynamicLibrary"
+}

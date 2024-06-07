@@ -1,3 +1,5 @@
+module xsr1core.base;
+
 import std.stdio;
 import std.algorithm;
 
@@ -112,27 +114,24 @@ void scanMaps(ref File f, ref MasterBlock master, ref MapInfo[] maps, uint mapIn
     }
 }
 
-int main(string[] args) {
-    File f = File(args[1], "rb");
-
+void parseImage(File inputFile, File outputFile) {
     uint masterBlock, masterPage;
-    findNewestMaster(f, masterBlock, masterPage);
+    findNewestMaster(inputFile, masterBlock, masterPage);
 
-    f.seek((masterBlock * PAGES_PER_BLOCK + masterPage) * BYTES_PER_PAGE);
+    inputFile.seek((masterBlock * PAGES_PER_BLOCK + masterPage) * BYTES_PER_PAGE);
 
     MasterBlock master;
-    f.rawRead((&master)[0..1]);
-	
-	writefln!"partition size (PHY) %d blocks (%d bytes)"(master.max_device_blk, master.max_device_blk * PAGES_PER_BLOCK * BYTES_PER_PAGE);
-	writefln!"LBA partition size (LBA) %d sectors (%d bytes)"(master.num_lba_sectors, master.num_lba_sectors * BYTES_PER_PAGE);
+    inputFile.rawRead((&master)[0..1]);
+    
+    writefln!"partition size (PHY) %d blocks (%d bytes)"(master.max_device_blk, master.max_device_blk * PAGES_PER_BLOCK * BYTES_PER_PAGE);
+    writefln!"LBA partition size (LBA) %d sectors (%d bytes)"(master.num_lba_sectors, master.num_lba_sectors * BYTES_PER_PAGE);
 
     MapInfo[] maps = new MapInfo[master.max_map_index];
 
     foreach (uint i; 0..master.num_block_maps) {
-        scanMaps(f, master, maps, i);
+        scanMaps(inputFile, master, maps, i);
     }
 
-    File wf = File(args[2], "wb");
     ubyte[2048] buffer;
     foreach (ref MapInfo mapInfo; maps) {
         writefln!"map %d: block %#x, page %#x"(mapInfo.map.index, mapInfo.block, mapInfo.page);
@@ -140,15 +139,10 @@ int main(string[] args) {
             uint block = mapInfo.map.block_map[i];
             foreach (uint j; 0..64) {
                 uint page = mapInfo.map.page_map[i][j] * 4;
-                f.seek((block * PAGES_PER_BLOCK + page) * BYTES_PER_PAGE);
-                f.rawRead(buffer);
-                wf.rawWrite(buffer);
+                inputFile.seek((block * PAGES_PER_BLOCK + page) * BYTES_PER_PAGE);
+                inputFile.rawRead(buffer);
+                outputFile.rawWrite(buffer);
             }
         }
     }
-
-    f.close();
-    wf.close();
-
-    return 0;
 }

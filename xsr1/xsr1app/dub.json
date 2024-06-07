@@ -1,0 +1,7 @@
+{
+	"name": "xsr1app",
+    "targetType": "executable",
+	"dependencies": {
+		"rfs_dumper:xsr1core": "*"
+	}
+}

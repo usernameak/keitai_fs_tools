@@ -14,3 +14,7 @@ rfs_dumper-test-*
 *.o
 *.obj
 *.lst
+*.dll
+*.exp
+*.lib
+*.pdb
