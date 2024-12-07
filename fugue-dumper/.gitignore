@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/fsrecovery
+fsrecovery.so
+fsrecovery.dylib
+fsrecovery.dll
+fsrecovery.a
+fsrecovery.lib
+fsrecovery-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst

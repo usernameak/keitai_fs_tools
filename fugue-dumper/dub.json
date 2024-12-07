@@ -1,0 +1,12 @@
+{
+	"authors": [
+		"usernameak"
+	],
+	"copyright": "Copyright © 2023, usernameak",
+	"dependencies": {
+		"sizes": "~>1.0.0"
+	},
+	"description": "fsrecovery",
+	"license": "BSD-3-Clause",
+	"name": "fsrecovery"
+}

@@ -95,7 +95,7 @@ void findNewestMaster(ref File f, uint origin, out uint masterBlock, out uint ma
     for (uint block = 0; block < 2; block++) {
         for (uint page = 0; page < PAGES_PER_BLOCK; page++) {
             f.rawRead(buffer);
-            if (all!"a == 0xFF"(buffer[0..128])) continue;
+            if (all!"a == 0xFFFFFFFF"(buffer[0..128])) continue;
             if (sum(buffer[0..127]) != buffer[127]) continue;
             
             if (buffer[0x7C] > maxGeneration) {
@@ -121,18 +121,16 @@ void scanMaps(ref File f, uint origin, ref MasterBlock master, ref MapInfo[] map
 
     uint[BYTES_PER_PAGE / 4] buffer;
 
-    uint maxPage = 0, maxGeneration = 0;
     for (uint page = 0; page < PAGES_PER_BLOCK; page++) {
         f.rawRead(buffer);
-        if (all!"a == 0xFF"(buffer[0..128])) continue;
+        if (all!"a == 0xFFFFFFFF"(buffer[0..128])) continue;
+        if (all!"a == 0"(buffer[0..128])) continue;
         if (sum(buffer[0..127]) != buffer[127]) continue;
         if ((cast(ubyte[])buffer)[0x1F9] > 2) continue;
-        if (buffer[0x7C] > maxGeneration) {
-            maxPage = page;
-            maxGeneration = buffer[0x7C];
-        }
         MapBlock* map = cast(MapBlock*)buffer;
+        // writefln!"map index %#x"(map.index);
         if (map.generation >= maps[map.index].map.generation) {
+            writefln!"map entry: %#x %#x"(map.index, page);
             maps[map.index].block = master.map_blocks[mapIndex];
             maps[map.index].page = page;
             maps[map.index].map = *map;
@@ -142,6 +140,7 @@ void scanMaps(ref File f, uint origin, ref MasterBlock master, ref MapInfo[] map
 
 void parseImage(File inputFile, File outputFile) {
     uint masterBlockOrigin = findMasterBlockOrigin(inputFile);
+    writefln!"Master block origin: %#x"(masterBlockOrigin);
 
     uint masterBlock, masterPage;
     findNewestMaster(inputFile, masterBlockOrigin, masterBlock, masterPage);
@@ -161,10 +160,11 @@ void parseImage(File inputFile, File outputFile) {
     }
 
     ubyte[2048] buffer;
-    foreach (ref MapInfo mapInfo; maps) {
-        writefln!"map %d: block %#x, page %#x"(mapInfo.map.index, mapInfo.block, mapInfo.page);
+    foreach (mapIndex, ref MapInfo mapInfo; maps) {
+        writefln!"map %d: block %#x, page %#x"(mapIndex, mapInfo.block, mapInfo.page);
         foreach (uint i; 0..7) {
             uint block = mapInfo.map.block_map[i];
+            writefln!"block %#x"(block);
             foreach (uint j; 0..64) {
                 uint page = mapInfo.map.page_map[i][j] * 4;
                 inputFile.seek(((block + masterBlockOrigin) * PAGES_PER_BLOCK + page) * BYTES_PER_PAGE);
