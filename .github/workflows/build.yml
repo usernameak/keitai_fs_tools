@@ -51,6 +51,15 @@ jobs:
         with: 
           name: fugue-dumper - ${{ matrix.os }} binary
           path: ./fugue-dumper/fsrecovery*
+      
+      - name: Update nightly release
+        uses: pyTooling/Actions/releaser@main
+        if: github.ref == 'refs/heads/master'
+        with:
+          tag: nightly
+          rm: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: './fugue-dumper/fsrecovery*'
 
   toshiba:
     name: toshiba build - ${{ matrix.os }}
