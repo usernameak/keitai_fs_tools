@@ -15,7 +15,7 @@ jobs:
       - name: Install D compiler
         uses: dlang-community/setup-dlang@v1
         with:
-          compiler: dmd-latest
+          compiler: ldc-latest
 
       - name: Run build
         working-directory: ./xsr1
@@ -26,6 +26,31 @@ jobs:
         with: 
           name: xsr1 - ${{ matrix.os }} binary
           path: ./xsr1/rfs_dumper*
+
+  fugue:
+    name: fugue build - ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install D compiler
+        uses: dlang-community/setup-dlang@v1
+        with:
+          compiler: ldc-latest
+
+      - name: Run build
+        working-directory: ./fugue-dumper
+        run: dub build --build=release
+
+      - name: Upload ${{ matrix.os }} binary
+        uses: actions/upload-artifact@v4
+        with: 
+          name: fugue-dumper - ${{ matrix.os }} binary
+          path: ./fugue-dumper/fsrecovery*
 
   toshiba:
     name: toshiba build - ${{ matrix.os }}
