@@ -4,7 +4,7 @@
 	"dependencies": {
 		"rfs_dumper:xsr1core": "*"
 	},
-    "dflags-ldc": [
-        "--link-defaultlib-shared"
-    ]
+    "subConfigurations": {
+		"rfs_dumper:xsr1core": "static"
+    }
 }

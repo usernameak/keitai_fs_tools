@@ -25,7 +25,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with: 
           name: xsr1 - ${{ matrix.os }} binary
-          path: ./xsr1/rfs_dumper*
+          path: ./xsr1/xsr1app/rfs_dumper_xsr1app.*
 
   fugue:
     name: fugue build - ${{ matrix.os }}

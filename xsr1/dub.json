@@ -12,7 +12,23 @@
 	"license": "BSD-3-Clause",
 	"name": "rfs_dumper",
 	"dependencies": {
-		":xsr1app": "*",
 		":xsr1core": "*"
-	}
+	},
+	"configurations": [
+		{
+			"name": "application",
+			"dependencies": {
+				"rfs_dumper:xsr1app": "*"
+			},
+			"subConfigurations": {
+				":xsr1core": "static"
+			}
+		},
+		{
+			"name": "dll",
+			"subConfigurations": {
+				":xsr1core": "dynamic"
+			}
+		}
+	]
 }

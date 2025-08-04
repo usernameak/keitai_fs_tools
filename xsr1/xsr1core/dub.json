@@ -1,7 +1,14 @@
 {
 	"name": "xsr1core",
-    "targetType": "dynamicLibrary",
-    "dflags-ldc": [
-        "--link-defaultlib-shared"
+    "configurations": [
+        {
+            "name": "static",
+            "targetType": "staticLibrary"
+        },
+        {
+            "name": "dynamic",
+            "targetType": "dynamicLibrary",
+            "versions": ["XSR1_CInterface"]
+        }
     ]
 }
